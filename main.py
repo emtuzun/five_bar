@@ -7,24 +7,41 @@ import time
 
 
 def calculate_angles():
-    c = float(arm_dis_var.get())
+    a = float(arm_dis_var.get())
     k = float(arm_len1_var.get())
+    l = float(arm_len2_var.get())
     x_1 = float(pos1_x_var.get())
     y_1 = float(pos1_y_var.get())
     x_2 = float(pos2_x_var.get())
     y_2 = float(pos2_y_var.get())
-    angle1 = (math.pi - math.acos(1-(math.sqrt(x_1**2+y_1**2)) /
-              (2*(k**2))))/2 + math.acos(x_1/math.sqrt(x_1**2+y_1**2))
-    angle3 = (math.pi - math.acos(1-(math.sqrt(x_2**2+y_2**2)) /
-              (2*(k**2))))/2 + math.acos(x_2/math.sqrt(x_2**2+y_2**2))
-    # angle2 = math.pi - (math.acos(1-((c-x_1)**2+(y_1**2))/2*(k**2)) +
-    #                    math.acos((c-x_1)/math.sqrt((c-x_1)**2)+y_1**2))
-    # angle4 = math.pi - (math.acos(1-((c-x_2)**2+(y_2**2))/2*(k**2)) +
-    #                    math.acos((c-x_2)/math.sqrt((c-x_2)**2)+y_2**2))
+
+    b = math.sqrt(y_1**2 + (x_1-a/2)**2)
+    c = math.sqrt(y_1**2 + (x_1+a/2)**2)
+    alpha_1 = math.acos((a**2 + b**2 - c**2)/(2*a*b))
+    alpha_2 = math.acos((k**2 + b**2 - l**2)/(2*k*b))
+    beta_1 = math.acos((a**2 + c**2 - b**2)/(2*a*c))
+    beta_2 = math.acos((k**2 + c**2 - l**2)/(2*k*c))
+    angle1 = beta_1+beta_2
+    angle2 = math.pi - (alpha_1 + alpha_2)
+    if (y_1 < 0):
+        angle1 = -angle1
+        angle2 = -angle2
+
+    b = math.sqrt(y_2**2 + (x_2-a/2)**2)
+    c = math.sqrt(y_2**2 + (x_2+a/2)**2)
+    alpha_1 = math.acos((a**2 + b**2 - c**2)/(2*a*b))
+    alpha_2 = math.acos((k**2 + b**2 - l**2)/(2*k*b))
+    beta_1 = math.acos((a**2 + c**2 - b**2)/(2*a*c))
+    beta_2 = math.acos((k**2 + c**2 - l**2)/(2*k*c))
+    angle3 = beta_1+beta_2
+    angle4 = math.pi - (alpha_1 + alpha_2)
+    if (y_2 < 0):
+        angle3 = -angle3
+        angle4 = -angle4
     print(math.degrees(angle1))
-    # print(math.degrees(angle2))
+    print(math.degrees(angle2))
     print(math.degrees(angle3))
-    # print(math.degrees(angle4))
+    print(math.degrees(angle4))
 # drawing arms function
 
 
