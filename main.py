@@ -3,9 +3,39 @@ from tkinter import ttk
 import math
 import time
 
-# calculating angles
-
 lines = []
+move_trace = []
+points = []
+clicked = False
+
+# Click function
+def click_fun(event):
+    global clicked
+    x = event.x - 250
+    y = 250 - event.y
+    try:
+        a = float(arm_dis_var.get())/2
+        arm_len = float(arm_len1_var.get()) + float(arm_len2_var.get())
+        if math.sqrt((x-a)**2+y**2) < arm_len and math.sqrt((x+a)**2+y**2) < arm_len:
+            if not clicked:
+                for i in range(len(points)):
+                    canvas.delete(points[i])
+                points.clear()
+                pos1_x_var.set(str(x))
+                pos1_y_var.set(str(y))
+                points.append(canvas.create_oval(event.x, event.y, event.x+2, event.y+2))
+                canvas.update()
+                clicked = True
+            else:
+                pos2_x_var.set(str(x))
+                pos2_y_var.set(str(y))
+                points.append(canvas.create_oval(event.x, event.y, event.x+2, event.y+2))
+                canvas.update()
+                clicked = False
+    except:
+        print("hata")
+
+# calculating angles
 
 def calculate_angles():
     a = float(arm_dis_var.get())
@@ -27,7 +57,6 @@ def calculate_angles():
     if (y_1 < 0):
         angle1 = -angle1
         angle2 = -angle2
-
     b = math.sqrt(y_2**2 + (x_2-a/2)**2)
     c = math.sqrt(y_2**2 + (x_2+a/2)**2)
     alpha_1 = math.acos((a**2 + b**2 - c**2)/(2*a*b))
@@ -39,20 +68,29 @@ def calculate_angles():
     if (y_2 < 0):
         angle3 = -angle3
         angle4 = -angle4
-    print(math.degrees(angle1))
-    print(math.degrees(angle2))
-    print(math.degrees(angle3))
-    print(math.degrees(angle4))
+    # if angle1 > 180:
+    #     angle1 -= 2 * math.pi
+    # if angle2 > 180:
+    #     angle2 -= 2 * math.pi
+    # if angle3 > 180:
+    #     angle3 -= 2 * math.pi
+    # if angle4 > 180:
+    #     angle4 -= 2 * math.pi
+    angle1_var.set(str(math.degrees(angle1)))
+    angle2_var.set(str(math.degrees(angle2)))
+    angle3_var.set(str(math.degrees(angle3)))
+    angle4_var.set(str(math.degrees(angle4)))
 
 # creatin working plane
 def create_working_plane():
+    canvas.delete("all")
     x = float(arm_dis_var.get()) / 2
     arm_len1 = float(arm_len1_var.get())
     arm_len2 = float(arm_len2_var.get())
     z = arm_len1 + arm_len2
     y = math.sqrt(z**2 - x**2)
     alpha = math.acos((x**2 + z**2 - y**2)/(2*x*z))
-    print(math.degrees(alpha))
+    #print(math.degrees(alpha))
     canvas.create_arc(250+x-z, 250-z, 250+x+z, 250+z, start=math.degrees(math.pi-alpha), extent=math.degrees(2*alpha), style=tk.ARC)
     canvas.create_arc(250-x-z, 250-z, 250-x+z, 250+z, start=math.degrees(2*math.pi-alpha), extent=math.degrees(2*alpha), style=tk.ARC)
     draw_arms(x*2, arm_len1, arm_len2, 100, 80)
@@ -75,11 +113,13 @@ def draw_arms(arm_dis: float, arm_len1: float, arm_len2: float, angle1: float, a
     lines.append(canvas.create_line(x_1, y_1, x_3, y_3))
     lines.append(canvas.create_line(250+(arm_dis/2), 250, x_2, y_2))
     lines.append(canvas.create_line(x_2, y_2, x_3, y_3))
-    canvas.create_oval(x_3, y_3, x_3+1, y_3+1)
+    move_trace.append(canvas.create_oval(x_3, y_3, x_3+1, y_3+1))
 
-
+# move arms
 def move_arms():
-    canvas.delete("all")
+    for i in range(len(move_trace)):
+        canvas.delete(move_trace[i])
+    move_trace.clear()
     arm_dis = float(arm_dis_var.get())
     arm_len1 = float(arm_len1_var.get())
     arm_len2 = float(arm_len2_var.get())
@@ -91,10 +131,10 @@ def move_arms():
     for i in range(n):
         draw_arms(arm_dis, arm_len1, arm_len2, angle1 +
                   ((angle3-angle1)/n)*i, angle2+((angle4-angle2)/n)*i)
-        time.sleep(0.001)
+        time.sleep(0.01)
         root.update()
 
-
+# creatink tk window
 root = tk.Tk()
 root.title("Five Bars")
 
@@ -132,6 +172,7 @@ pos1_y_entry = ttk.Entry(root, textvariable=pos1_y_var)
 pos2_x_entry = ttk.Entry(root, textvariable=pos2_x_var)
 pos2_y_entry = ttk.Entry(root, textvariable=pos2_y_var)
 
+
 sub_btn = ttk.Button(root, text='Create Animation', command=move_arms)
 cal_btn = ttk.Button(root, text='Calculate Angle', command=calculate_angles)
 create_plane_btn = ttk.Button(root, text='Create Working Plane', command=create_working_plane)
@@ -163,6 +204,7 @@ cal_btn.grid(column=1, row=9)
 sub_btn.grid(column=2, row=9)
 
 canvas = tk.Canvas(root, bg="white", height=500, width=500)
+canvas.bind("<Button-1>", click_fun)
 canvas.create_line(0, 250, 500, 250, dash=(3, 1))
 canvas.grid(column=0, row=10, columnspan=3)
 root.mainloop()
