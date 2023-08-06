@@ -7,6 +7,7 @@ lines = []
 move_trace = []
 points = []
 clicked = False
+reversing = 0
 
 # Click function
 def click_fun(event):
@@ -36,8 +37,8 @@ def click_fun(event):
         print("hata")
 
 # calculating angles
-
 def calculate_angles():
+    global reversing
     a = float(arm_dis_var.get())
     k = float(arm_len1_var.get())
     l = float(arm_len2_var.get())
@@ -45,6 +46,7 @@ def calculate_angles():
     y_1 = float(pos1_y_var.get())
     x_2 = float(pos2_x_var.get())
     y_2 = float(pos2_y_var.get())
+    reversing = y_1
 
     b = math.sqrt(y_1**2 + (x_1-a/2)**2)
     c = math.sqrt(y_1**2 + (x_1+a/2)**2)
@@ -68,14 +70,6 @@ def calculate_angles():
     if (y_2 < 0):
         angle3 = -angle3
         angle4 = -angle4
-    # if angle1 > 180:
-    #     angle1 -= 2 * math.pi
-    # if angle2 > 180:
-    #     angle2 -= 2 * math.pi
-    # if angle3 > 180:
-    #     angle3 -= 2 * math.pi
-    # if angle4 > 180:
-    #     angle4 -= 2 * math.pi
     angle1_var.set(str(math.degrees(angle1)))
     angle2_var.set(str(math.degrees(angle2)))
     angle3_var.set(str(math.degrees(angle3)))
@@ -84,27 +78,34 @@ def calculate_angles():
 # creatin working plane
 def create_working_plane():
     canvas.delete("all")
-    x = float(arm_dis_var.get()) / 2
-    arm_len1 = float(arm_len1_var.get())
-    arm_len2 = float(arm_len2_var.get())
-    z = arm_len1 + arm_len2
-    y = math.sqrt(z**2 - x**2)
-    alpha = math.acos((x**2 + z**2 - y**2)/(2*x*z))
-    #print(math.degrees(alpha))
-    canvas.create_arc(250+x-z, 250-z, 250+x+z, 250+z, start=math.degrees(math.pi-alpha), extent=math.degrees(2*alpha), style=tk.ARC)
-    canvas.create_arc(250-x-z, 250-z, 250-x+z, 250+z, start=math.degrees(2*math.pi-alpha), extent=math.degrees(2*alpha), style=tk.ARC)
-    draw_arms(x*2, arm_len1, arm_len2, 100, 80)
+    try:
+        x = float(arm_dis_var.get()) / 2
+        arm_len1 = float(arm_len1_var.get())
+        arm_len2 = float(arm_len2_var.get())
+        z = arm_len1 + arm_len2
+        y = math.sqrt(z**2 - x**2)
+        alpha = math.acos((x**2 + z**2 - y**2)/(2*x*z))
+        #print(math.degrees(alpha))
+        canvas.create_arc(250+x-z, 250-z, 250+x+z, 250+z, start=math.degrees(math.pi-alpha), extent=math.degrees(2*alpha), style=tk.ARC)
+        canvas.create_arc(250-x-z, 250-z, 250-x+z, 250+z, start=math.degrees(2*math.pi-alpha), extent=math.degrees(2*alpha), style=tk.ARC)
+        draw_arms(x*2, arm_len1, arm_len2, math.pi/2, math.pi/2, False)
+    except:
+        print("Degerler eksik girildi")
 
 # drawing arms function
-def draw_arms(arm_dis: float, arm_len1: float, arm_len2: float, angle1: float, angle2: float):
-    x_1 = 250-(arm_dis/2)+arm_len1*math.cos(math.radians(angle1))
-    y_1 = 250-arm_len1*math.sin(math.radians(angle1))
-    x_2 = 250+(arm_dis/2)+arm_len1*math.cos(math.radians(angle2))
-    y_2 = 250-arm_len1*math.sin(math.radians(angle2))
+def draw_arms(arm_dis: float, arm_len1: float, arm_len2: float, angle1: float, angle2: float, reverse:bool):
+    x_1 = 250-(arm_dis/2)+arm_len1*math.cos(angle1)
+    y_1 = 250-arm_len1*math.sin(angle1)
+    x_2 = 250+(arm_dis/2)+arm_len1*math.cos(angle2)
+    y_2 = 250-arm_len1*math.sin(angle2)
     d = math.sqrt((x_1-x_2)**2 + (y_1-y_2)**2)
     h = math.sqrt(arm_len2**2 - (d/2)**2)
-    x_3 = ((x_1+x_2) / 2) + (h*(y_2-y_1))/d
-    y_3 = ((y_1+y_2) / 2) - (h*(x_2-x_1))/d
+    if reverse:
+        x_3 = ((x_1+x_2) / 2) - (h*(y_2-y_1))/d
+        y_3 = ((y_1+y_2) / 2) + (h*(x_2-x_1))/d
+    else:
+        x_3 = ((x_1+x_2) / 2) + (h*(y_2-y_1))/d
+        y_3 = ((y_1+y_2) / 2) - (h*(x_2-x_1))/d
     for i in range(len(lines)):
         canvas.delete(lines[i])
     lines.clear()
@@ -123,18 +124,41 @@ def move_arms():
     arm_dis = float(arm_dis_var.get())
     arm_len1 = float(arm_len1_var.get())
     arm_len2 = float(arm_len2_var.get())
-    angle1 = float(angle1_var.get())
-    angle2 = float(angle2_var.get())
-    angle3 = float(angle3_var.get())
-    angle4 = float(angle4_var.get())
+    angle1 = math.radians(float(angle1_var.get()))
+    angle2 = math.radians(float(angle2_var.get()))
+    angle3 = math.radians(float(angle3_var.get()))
+    angle4 = math.radians(float(angle4_var.get()))
+    # if angle1 > math.pi:
+    #     angle1 -= 2 * math.pi
+    # elif angle1 <-math.pi:
+    #     angle1 += 2 * math.pi
+    # if angle2 > math.pi:
+    #     angle2 -= 2 * math.pi
+    # elif angle2 <-math.pi:
+    #     angle2 += 2 * math.pi
+    # if angle3 > math.pi:
+    #     angle3 -= 2 * math.pi
+    # elif angle3 <-math.pi:
+    #     angle3 += 2 * math.pi
+    # if angle4 > math.pi:
+    #     angle4 -= 2 * math.pi
+    # elif angle4 <-math.pi:
+    #     angle4 += 2 * math.pi    
     n = 200
+    if reversing < 0:
+        reversed = True
+    else:
+        reversed = False
     for i in range(n):
-        draw_arms(arm_dis, arm_len1, arm_len2, angle1 +
-                  ((angle3-angle1)/n)*i, angle2+((angle4-angle2)/n)*i)
+        next_angle1 = angle1 + ((angle3-angle1)/n)*i
+        next_angle2 = angle2 + ((angle4-angle2)/n)*i
+        if next_angle1 == math.pi and next_angle2 == 0:
+            reversed = not reversed
+        draw_arms(arm_dis, arm_len1, arm_len2, next_angle1, next_angle2, reversed)
         time.sleep(0.01)
         root.update()
 
-# creatink tk window
+# creating tk window
 root = tk.Tk()
 root.title("Five Bars")
 
