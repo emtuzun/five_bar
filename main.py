@@ -40,6 +40,29 @@ def click_fun(event):
     except:
         print("hata")
 
+
+# calculating angle for a point
+
+def angle_of_point(x, y):
+    global reversing
+    a = float(arm_dis_var.get())
+    k = float(arm_len1_var.get())
+    l = k+a/2
+    reversing = y
+
+    b = math.sqrt(y**2 + (x-a/2)**2)
+    c = math.sqrt(y**2 + (x+a/2)**2)
+    alpha_1 = math.acos((a**2 + b**2 - c**2)/(2*a*b))
+    alpha_2 = math.acos((k**2 + b**2 - l**2)/(2*k*b))
+    beta_1 = math.acos((a**2 + c**2 - b**2)/(2*a*c))
+    beta_2 = math.acos((k**2 + c**2 - l**2)/(2*k*c))
+    angle1 = beta_1+beta_2
+    angle2 = math.pi - (alpha_1 + alpha_2)
+    if (y < 0):
+        angle1 = -angle1
+        angle2 = -angle2
+    return angle1, angle2
+
 # calculating angles
 
 
@@ -149,38 +172,33 @@ def move_arms():
     move_trace.clear()
     arm_dis = float(arm_dis_var.get())
     arm_len1 = float(arm_len1_var.get())
-    angle1 = math.radians(float(angle1_var.get()))
-    angle2 = math.radians(float(angle2_var.get()))
-    angle3 = math.radians(float(angle3_var.get()))
-    angle4 = math.radians(float(angle4_var.get()))
-    # if angle1 > math.pi:
-    #     angle1 -= 2 * math.pi
-    # elif angle1 <-math.pi:
-    #     angle1 += 2 * math.pi
-    # if angle2 > math.pi:
-    #     angle2 -= 2 * math.pi
-    # elif angle2 <-math.pi:
-    #     angle2 += 2 * math.pi
-    # if angle3 > math.pi:
-    #     angle3 -= 2 * math.pi
-    # elif angle3 <-math.pi:
-    #     angle3 += 2 * math.pi
-    # if angle4 > math.pi:
-    #     angle4 -= 2 * math.pi
-    # elif angle4 <-math.pi:
-    #     angle4 += 2 * math.pi
-    n = 200
-    if reversing < 0:
+    pos1_x = float(pos1_x_var.get())
+    pos1_y = float(pos1_y_var.get())
+    pos2_x = float(pos2_x_var.get())
+    pos2_y = float(pos2_y_var.get())
+    if pos1_y < 0:
         reversed = True
     else:
         reversed = False
-    for i in range(n):
-        next_angle1 = angle1 + ((angle3-angle1)/n)*i
-        next_angle2 = angle2 + ((angle4-angle2)/n)*i
-        if next_angle1 == math.pi and next_angle2 == 0:
+
+    if (pos2_x - pos1_x == 0):
+        m = math.inf
+    else:
+        m = (pos2_y - pos1_y)/(pos2_x - pos1_x)
+    n = pos1_y - m*pos1_x
+    k = 200
+    point_y = pos1_y
+    for i in range(k+1):
+        point_x = pos1_x + i*((pos2_x-pos1_x)/k)
+        old_y = point_y
+        if m == math.inf:
+            point_y = pos1_y + i*((pos2_y-pos1_y)/k)
+        else:
+            point_y = m*(pos1_x + i*((pos2_x - pos1_x)/k))+n
+        angle1, angle2 = angle_of_point(point_x, point_y)
+        if (point_y <= 0 and old_y > 0) or (point_y >= 0 and old_y < 0):
             reversed = not reversed
-        draw_arms(arm_dis, arm_len1,
-                  next_angle1, next_angle2, reversed)
+        draw_arms(arm_dis, arm_len1, angle1, angle2, reversed)
         time.sleep(0.01)
         root.update()
 
