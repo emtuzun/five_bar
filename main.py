@@ -7,7 +7,6 @@ lines = []
 move_trace = []
 points = []
 clicked = False
-reversing = 0
 
 # Click function
 
@@ -44,11 +43,9 @@ def click_fun(event):
 # calculating angle for a point
 
 def angle_of_point(x, y):
-    global reversing
     a = float(arm_dis_var.get())
     k = float(arm_len1_var.get())
     l = k+a/2
-    reversing = y
 
     b = math.sqrt(y**2 + (x-a/2)**2)
     c = math.sqrt(y**2 + (x+a/2)**2)
@@ -62,55 +59,6 @@ def angle_of_point(x, y):
         angle1 = -angle1
         angle2 = -angle2
     return angle1, angle2
-
-# calculating angles
-
-
-def calculate_angles():
-    global reversing
-    a = float(arm_dis_var.get())
-    k = float(arm_len1_var.get())
-    l = k+a/2
-    x_1 = float(pos1_x_var.get())
-    y_1 = float(pos1_y_var.get())
-    x_2 = float(pos2_x_var.get())
-    y_2 = float(pos2_y_var.get())
-    reversing = y_1
-
-    b = math.sqrt(y_1**2 + (x_1-a/2)**2)
-    c = math.sqrt(y_1**2 + (x_1+a/2)**2)
-    alpha_1 = math.acos((a**2 + b**2 - c**2)/(2*a*b))
-    alpha_2 = math.acos((k**2 + b**2 - l**2)/(2*k*b))
-    beta_1 = math.acos((a**2 + c**2 - b**2)/(2*a*c))
-    beta_2 = math.acos((k**2 + c**2 - l**2)/(2*k*c))
-    angle1 = beta_1+beta_2
-    angle2 = math.pi - (alpha_1 + alpha_2)
-    if (y_1 < 0):
-        angle1 = -angle1
-        angle2 = -angle2
-    b = math.sqrt(y_2**2 + (x_2-a/2)**2)
-    c = math.sqrt(y_2**2 + (x_2+a/2)**2)
-    alpha_1 = math.acos((a**2 + b**2 - c**2)/(2*a*b))
-    alpha_2 = math.acos((k**2 + b**2 - l**2)/(2*k*b))
-    beta_1 = math.acos((a**2 + c**2 - b**2)/(2*a*c))
-    beta_2 = math.acos((k**2 + c**2 - l**2)/(2*k*c))
-    angle3 = beta_1+beta_2
-    angle4 = math.pi - (alpha_1 + alpha_2)
-    if (y_2 < 0):
-        angle3 = -angle3
-        angle4 = -angle4
-    angle1_var.set(str(math.degrees(angle1)))
-    angle2_var.set(str(math.degrees(angle2)))
-    angle3_var.set(str(math.degrees(angle3)))
-    angle4_var.set(str(math.degrees(angle4)))
-    if reversing < 0:
-        reversed = True
-    else:
-        reversed = False
-    for i in range(len(move_trace)):
-        canvas.delete(move_trace[i])
-    move_trace.clear()
-    draw_arms(a, k, angle1, angle2, reversed)
 
 # creatin working plane
 
@@ -209,10 +157,6 @@ root.title("Five Bars")
 
 arm_dis_var = tk.StringVar()
 arm_len1_var = tk.StringVar()
-angle1_var = tk.StringVar()
-angle2_var = tk.StringVar()
-angle3_var = tk.StringVar()
-angle4_var = tk.StringVar()
 pos1_x_var = tk.StringVar()
 pos1_y_var = tk.StringVar()
 pos2_x_var = tk.StringVar()
@@ -220,19 +164,11 @@ pos2_y_var = tk.StringVar()
 
 arm_dis_label = ttk.Label(root, text="Arm Distance")
 arm_len1_label = ttk.Label(root, text="Arm Length 1")
-angle1_label = ttk.Label(root, text="Angle 1")
-angle2_label = ttk.Label(root, text="Angle 2")
-angle3_label = ttk.Label(root, text="Angle 3")
-angle4_label = ttk.Label(root, text="Angle 4")
 pos1_label = ttk.Label(root, text="Position 1")
 pos2_label = ttk.Label(root, text="Position 2")
 
 arm_dis_entry = ttk.Entry(root, textvariable=arm_dis_var)
 arm_len1_entry = ttk.Entry(root, textvariable=arm_len1_var)
-angle1_entry = ttk.Entry(root, textvariable=angle1_var)
-angle2_entry = ttk.Entry(root, textvariable=angle2_var)
-angle3_entry = ttk.Entry(root, textvariable=angle3_var)
-angle4_entry = ttk.Entry(root, textvariable=angle4_var)
 pos1_x_entry = ttk.Entry(root, textvariable=pos1_x_var)
 pos1_y_entry = ttk.Entry(root, textvariable=pos1_y_var)
 pos2_x_entry = ttk.Entry(root, textvariable=pos2_x_var)
@@ -240,7 +176,6 @@ pos2_y_entry = ttk.Entry(root, textvariable=pos2_y_var)
 
 
 sub_btn = ttk.Button(root, text='Create Animation', command=move_arms)
-cal_btn = ttk.Button(root, text='Calculate Angle', command=calculate_angles)
 create_plane_btn = ttk.Button(
     root, text='Create Working Plane', command=create_working_plane)
 
@@ -248,28 +183,19 @@ arm_dis_label.grid(column=0, row=0)
 arm_dis_entry.grid(column=1, row=0)
 arm_len1_label.grid(column=0, row=1)
 arm_len1_entry.grid(column=1, row=1)
-angle1_label.grid(column=0, row=2)
-angle1_entry.grid(column=1, row=2)
-angle2_label.grid(column=0, row=3)
-angle2_entry.grid(column=1, row=3)
-angle3_label.grid(column=0, row=4)
-angle3_entry.grid(column=1, row=4)
-angle4_label.grid(column=0, row=5)
-angle4_entry.grid(column=1, row=5)
 
-pos1_label.grid(column=0, row=6)
-pos1_x_entry.grid(column=1, row=6)
-pos1_y_entry.grid(column=2, row=6)
-pos2_label.grid(column=0, row=7)
-pos2_x_entry.grid(column=1, row=7)
-pos2_y_entry.grid(column=2, row=7)
+pos1_label.grid(column=0, row=3)
+pos1_x_entry.grid(column=1, row=3)
+pos1_y_entry.grid(column=2, row=3)
+pos2_label.grid(column=0, row=4)
+pos2_x_entry.grid(column=1, row=4)
+pos2_y_entry.grid(column=2, row=4)
 
-create_plane_btn.grid(column=0, row=8)
-cal_btn.grid(column=1, row=8)
-sub_btn.grid(column=2, row=8)
+create_plane_btn.grid(column=0, row=5)
+sub_btn.grid(column=2, row=5)
 
 canvas = tk.Canvas(root, bg="white", height=500, width=500)
 canvas.bind("<Button-1>", click_fun)
 canvas.create_line(0, 250, 500, 250, dash=(3, 1))
-canvas.grid(column=0, row=9, columnspan=3)
+canvas.grid(column=0, row=6, columnspan=3)
 root.mainloop()
