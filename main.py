@@ -66,6 +66,7 @@ def angle_of_point(x, y):
 def create_working_plane():
     canvas.delete("all")
     try:
+        motor_radius = float(motor_radius_var.get())
         x = float(arm_dis_var.get()) / 2
         arm_len1 = float(arm_len1_var.get())
         arm_len2 = arm_len1 + x
@@ -80,6 +81,10 @@ def create_working_plane():
                            arm_len1, 250+arm_len2-arm_len1)
         canvas.create_oval(250+x+arm_len1-arm_len2, 250+arm_len1-arm_len2, 250+x+arm_len2 -
                            arm_len1, 250+arm_len2-arm_len1)
+        canvas.create_oval(250-x-motor_radius, 250-motor_radius,
+                           250-x+motor_radius, 250+motor_radius)
+        canvas.create_oval(250+x-motor_radius, 250-motor_radius,
+                           250+x+motor_radius, 250+motor_radius)
         draw_arms(x*2, arm_len1, math.pi/2, math.pi/2, False)
     except:
         print("Degerler eksik girildi")
@@ -155,6 +160,7 @@ def move_arms():
 root = tk.Tk()
 root.title("Five Bars")
 
+motor_radius_var = tk.StringVar()
 arm_dis_var = tk.StringVar()
 arm_len1_var = tk.StringVar()
 pos1_x_var = tk.StringVar()
@@ -162,11 +168,13 @@ pos1_y_var = tk.StringVar()
 pos2_x_var = tk.StringVar()
 pos2_y_var = tk.StringVar()
 
+motor_radius_label = ttk.Label(root, text="Motor Radius")
 arm_dis_label = ttk.Label(root, text="Arm Distance")
 arm_len1_label = ttk.Label(root, text="Arm Length 1")
 pos1_label = ttk.Label(root, text="Position 1")
 pos2_label = ttk.Label(root, text="Position 2")
 
+motor_radius_entry = ttk.Entry(root, textvariable=motor_radius_var)
 arm_dis_entry = ttk.Entry(root, textvariable=arm_dis_var)
 arm_len1_entry = ttk.Entry(root, textvariable=arm_len1_var)
 pos1_x_entry = ttk.Entry(root, textvariable=pos1_x_var)
@@ -179,10 +187,12 @@ sub_btn = ttk.Button(root, text='Create Animation', command=move_arms)
 create_plane_btn = ttk.Button(
     root, text='Create Working Plane', command=create_working_plane)
 
-arm_dis_label.grid(column=0, row=0)
-arm_dis_entry.grid(column=1, row=0)
-arm_len1_label.grid(column=0, row=1)
-arm_len1_entry.grid(column=1, row=1)
+motor_radius_label.grid(column=0, row=0)
+motor_radius_entry.grid(column=1, row=0)
+arm_dis_label.grid(column=0, row=1)
+arm_dis_entry.grid(column=1, row=1)
+arm_len1_label.grid(column=0, row=2)
+arm_len1_entry.grid(column=1, row=2)
 
 pos1_label.grid(column=0, row=3)
 pos1_x_entry.grid(column=1, row=3)
