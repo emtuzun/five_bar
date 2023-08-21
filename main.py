@@ -133,27 +133,35 @@ def move_arms():
         reversed = True
     else:
         reversed = False
-
-    if (pos2_x - pos1_x == 0):
-        m = math.inf
-    else:
-        m = (pos2_y - pos1_y)/(pos2_x - pos1_x)
-    n = pos1_y - m*pos1_x
     k = 200
-    point_y = pos1_y
-    for i in range(k+1):
-        point_x = pos1_x + i*((pos2_x-pos1_x)/k)
-        old_y = point_y
-        if m == math.inf:
-            point_y = pos1_y + i*((pos2_y-pos1_y)/k)
+    if (mode.get() == 1):
+        if (pos2_x - pos1_x == 0):
+            m = math.inf
         else:
-            point_y = m*(pos1_x + i*((pos2_x - pos1_x)/k))+n
-        angle1, angle2 = angle_of_point(point_x, point_y)
-        if (point_y <= 0 and old_y > 0) or (point_y >= 0 and old_y < 0):
-            reversed = not reversed
-        draw_arms(arm_dis, arm_len1, angle1, angle2, reversed)
-        time.sleep(0.01)
-        root.update()
+            m = (pos2_y - pos1_y)/(pos2_x - pos1_x)
+        n = pos1_y - m*pos1_x
+        point_y = pos1_y
+        for i in range(k+1):
+            point_x = pos1_x + i*((pos2_x-pos1_x)/k)
+            old_y = point_y
+            if m == math.inf:
+                point_y = pos1_y + i*((pos2_y-pos1_y)/k)
+            else:
+                point_y = m*(pos1_x + i*((pos2_x - pos1_x)/k))+n
+            angle1, angle2 = angle_of_point(point_x, point_y)
+            if (point_y <= 0 and old_y > 0) or (point_y >= 0 and old_y < 0):
+                reversed = not reversed
+            draw_arms(arm_dis, arm_len1, angle1, angle2, reversed)
+            time.sleep(0.01)
+            root.update()
+    else:
+        angle1, angle2 = angle_of_point(pos1_x, pos1_y)
+        angle3, angle4 = angle_of_point(pos2_x, pos2_y)
+        for i in range(k+1):
+            draw_arms(arm_dis, arm_len1, angle1+(i/k)*(angle3-angle1),
+                      angle2+(i/k)*(angle4-angle2), reversed)
+            time.sleep(0.01)
+            root.update()
 
 
 # creating tk window
@@ -167,6 +175,10 @@ pos1_x_var = tk.StringVar()
 pos1_y_var = tk.StringVar()
 pos2_x_var = tk.StringVar()
 pos2_y_var = tk.StringVar()
+mode = tk.IntVar(root, 1)
+
+mode1_radio = ttk.Radiobutton(root, text="Linear", variable=mode, value=1)
+mode2_radio = ttk.Radiobutton(root, text="Circular", variable=mode, value=2)
 
 motor_radius_label = ttk.Label(root, text="Motor Radius")
 arm_dis_label = ttk.Label(root, text="Arm Distance")
@@ -202,10 +214,12 @@ pos2_x_entry.grid(column=1, row=4)
 pos2_y_entry.grid(column=2, row=4)
 
 create_plane_btn.grid(column=0, row=5)
+mode1_radio.grid(column=1, row=5)
+mode2_radio.grid(column=1, row=6)
 sub_btn.grid(column=2, row=5)
 
 canvas = tk.Canvas(root, bg="white", height=500, width=500)
 canvas.bind("<Button-1>", click_fun)
 canvas.create_line(0, 250, 500, 250, dash=(3, 1))
-canvas.grid(column=0, row=6, columnspan=3)
+canvas.grid(column=0, row=7, columnspan=3)
 root.mainloop()
